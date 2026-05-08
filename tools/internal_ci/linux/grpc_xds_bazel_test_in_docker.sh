@@ -78,6 +78,9 @@ python -m grpc_tools.protoc \
 cd /var/local/jenkins/grpc/
 bazel build test/cpp/interop:xds_interop_client
 
+# Guarantee logs are copied back at script termination regardless of set -e failure
+trap 'cp -rf /var/local/git/grpc/reports /var/local/jenkins/grpc/' EXIT
+
 # Run legacy ping_pong test. All tests are migrated to
 # https://github.com/grpc/psm-interop
 GRPC_VERBOSITY=debug GRPC_TRACE=xds_client,xds_resolver,xds_cluster_manager_lb,cds_lb,xds_cluster_resolver_lb,priority_lb,xds_cluster_impl_lb,weighted_target_lb \
@@ -92,6 +95,3 @@ GRPC_VERBOSITY=debug GRPC_TRACE=xds_client,xds_resolver,xds_cluster_manager_lb,c
     --verbose \
     ${XDS_V3_OPT-} \
     --client_cmd='bazel-bin/test/cpp/interop/xds_interop_client --server=xds:///{server_uri} --stats_port={stats_port} --qps={qps} {fail_on_failed_rpc} {rpcs_to_send} {metadata_to_send}'
-
-# Ensure logs are copied back to the mounted workspace for Kokoro artifact collection
-cp -rf /var/local/git/grpc/reports /var/local/jenkins/grpc/
