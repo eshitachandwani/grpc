@@ -92,3 +92,6 @@ GRPC_VERBOSITY=debug GRPC_TRACE=xds_client,xds_resolver,xds_cluster_manager_lb,c
     --verbose \
     ${XDS_V3_OPT-} \
     --client_cmd='bazel-bin/test/cpp/interop/xds_interop_client --server=xds:///{server_uri} --stats_port={stats_port} --qps={qps} {fail_on_failed_rpc} {rpcs_to_send} {metadata_to_send}'
+
+# Ensure logs are copied back to the mounted workspace for Kokoro artifact collection
+cp -rf /var/local/git/grpc/reports /var/local/jenkins/grpc/
