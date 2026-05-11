@@ -313,6 +313,8 @@ def _on_rpc_done(
 ) -> None:
     exception = future.exception()
     hostname = ""
+    initial_metadata = ()
+    trailing_metadata = ()
     with _global_lock:
         _global_rpc_statuses[method][future.code().value[0]] += 1
     if exception is not None:
@@ -324,8 +326,10 @@ def _on_rpc_done(
             logger.error(exception)
     else:
         response = future.result()
+        initial_metadata = future.initial_metadata()
+        trailing_metadata = future.trailing_metadata()
         hostname = None
-        for metadatum in future.initial_metadata():
+        for metadatum in initial_metadata:
             if metadatum[0] == "hostname":
                 hostname = metadatum[1]
                 break
@@ -348,8 +352,8 @@ def _on_rpc_done(
                 rpc_id,
                 hostname,
                 method,
-                initial_metadata=future.initial_metadata(),
-                trailing_metadata=future.trailing_metadata(),
+                initial_metadata=initial_metadata,
+                trailing_metadata=trailing_metadata,
             )
 
 
